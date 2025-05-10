@@ -38,6 +38,7 @@ export class ConnectionManager {
 
         if (this.status == HealthcheckStatus.OK) 
         {
+            //ScClient by default works in browser environment but we are working with node js
             const ws_ = new WebSocket(url) as unknown as globalThis.WebSocket;
             this.client = new ScClient(ws_);
 
@@ -66,6 +67,7 @@ export class ConnectionManager {
         this._statusBarItem.text = "Disconnected";
     }
 
+    //test whether sc-server can be accessed
     async test(url: string) 
     {
         try 

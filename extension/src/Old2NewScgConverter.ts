@@ -1,6 +1,7 @@
 import {DOMParser} from 'xmldom';
 import {XMLSerializer} from 'xmldom';
 
+//this module should be replaced in the future (possibly it is not necessary)
 let dictionary: Map<string, string>;
 const getDictionary = () => {
     const replacementPairs = new Map();

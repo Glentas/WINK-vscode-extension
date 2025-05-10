@@ -13,16 +13,19 @@ export class SearcherByTemplate {
         console.log("findByScsTemplate, scsTemplate:", scsTemplate);
         console.log("findByScsTemplate, structWinkIdtf:", structWinkIdtf);
 
-        
+        //returns array with scAddrs which are correspond to template
         const searchingResults = await this.scClient.searchByTemplate(scsTemplate);
         console.log("findByScsTemplate, searchingResults:", searchingResults);
 
+        // from found scAddrs we collect theirs int values
         const uniqNodes = new Set<number>();
         searchingResults.forEach(e => e.forEachTriple(n => uniqNodes.add(n.value)));
 
+        // sctructure which contains found construstions
         const structNode = (await this.scClient.resolveKeynodes([{id: structWinkIdtf, type: ScType.ConstNodeStructure}]))[0];
         const construction = new ScConstruction();
 
+        // connect found constructions to structure
         uniqNodes.forEach(node => {
             construction.generateConnector(
                 ScType.ConstPermPosArc,
