@@ -18,7 +18,7 @@ import {convertOldGwfToNew, isOldGwf} from "./Old2NewScgConverter";
 
 ``
 let client: LanguageClient;
-let scMachineUrl = "ws:\\\\localhost:8090";
+let scMachineUrl = "ws://localhost:8090";
 let scsLoader: ScsLoader;
 let scsSearcher: SearcherByTemplate;
 let connectionManager: ConnectionManager;
