@@ -1,6 +1,0 @@
-five_hundred=>nrel_main_idtf:
-[500](*<-lang_ru;;*);
-[500](*<-lang_en;;*);;
-
-concept_number -> five_hundred;;
-set_of_number -> five_hundred;;

@@ -1,6 +1,0 @@
-fifty_two=>nrel_main_idtf:
-[52](*<-lang_ru;;*);
-[52](*<-lang_en;;*);;
-
-concept_number -> fifty_two;;
-set_of_number -> fifty_two;;

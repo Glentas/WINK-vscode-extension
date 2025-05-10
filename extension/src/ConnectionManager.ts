@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
 import {WebSocket} from "ws";
-import {ScClient} from 'ts-sc-client-ws';
+import {ScClient} from 'ts-sc-client';
 import {DidChangeConfigurationNotification, LanguageClient} from 'vscode-languageclient';
 
-export enum HealthcheckStatus {
+export enum HealthcheckStatus 
+{
     OK = 0,
     FAIL
 }
@@ -14,7 +15,8 @@ export class ConnectionManager {
     protected _statusBarItem: vscode.StatusBarItem;
     lsp_client: LanguageClient;
 
-    constructor(lsp_client: LanguageClient) {
+    constructor(lsp_client: LanguageClient) 
+    {
         this.lsp_client = lsp_client
         this.client = undefined;
         this.status = undefined;
@@ -22,63 +24,83 @@ export class ConnectionManager {
         this._statusBarItem.command = "scs.connect";
     }
 
-    get statusBarItem() {
+    get statusBarItem() 
+    {
         return this._statusBarItem;
     }
 
-    async connect(url: string) {
+    async connect(url: string) 
+    {
         await this.disconnect();
         await this.test(url);
-        while (this.status == undefined) ;
-        if (this.status == HealthcheckStatus.OK) {
-            this.client = new ScClient(url);
+
+        while (this.status == undefined);
+
+        if (this.status == HealthcheckStatus.OK) 
+        {
+            const ws_ = new WebSocket(url) as unknown as globalThis.WebSocket;
+            this.client = new ScClient(ws_);
+
+            console.log("connect, client's WebSocket:", ws_);
+            
             this.lsp_client.onReady().then(() => {
                 this.lsp_client.sendNotification(DidChangeConfigurationNotification.type, {
-                    settings:
-                        {scMachineUrl: url, onlineMode: true}
+                    settings: {scMachineUrl: url, onlineMode: true}
                 });
             })
+
             vscode.window.showInformationMessage('Connection with sc-server established successfully.');
             this.statusBarItem.text = url;
-        } else {
+        } 
+        else 
+        {
             this._statusBarItem.text = "Disconnected";
         }
         this.statusBarItem.show();
     }
 
-    async disconnect() {
+    async disconnect() 
+    {
         this.client = undefined;
         this.status = undefined;
         this._statusBarItem.text = "Disconnected";
     }
 
-    async test(url: string) {
-        try {
+    async test(url: string) 
+    {
+        try 
+        {
             let ws = new WebSocket(url);
             ws.addEventListener("open", () => {
                 ws.send('{"type": "healthcheck"}');
             });
+
             ws.addEventListener("message", (event) => {
                 if (event.data.toString() === '"OK"') {
                     this.status = HealthcheckStatus.OK;
-                } else {
+                } 
+                else 
+                {
                     vscode.window.showErrorMessage("Missmatching server responce. Please, make sure that you're connected to sc-server");
                     this.status = HealthcheckStatus.FAIL;
                 }
             });
+
             ws.addEventListener("error", (event) => {
                 vscode.window.showErrorMessage(event.message + ". Unable to locate sc-server.");
                 this.status = HealthcheckStatus.FAIL;
             });
+
             await delay(1000);
             // await waitForOpenConnection(ws).catch(value => { vscode.window.showErrorMessage(value.message) });
-        } catch (e) {
+
+        } catch (e) 
+        {
             vscode.window.showErrorMessage(e.message);
             //send LSP server to offline mode if connection is known to be broken
             this.lsp_client.onReady().then(() => {
                 this.lsp_client.sendNotification(DidChangeConfigurationNotification.type, {
-                    settings:
-                        {scMachineUrl: '', onlineMode: false}
+                    settings: {scMachineUrl: '', onlineMode: false}
                 });
             })
             this.status = HealthcheckStatus.FAIL;
@@ -86,7 +108,8 @@ export class ConnectionManager {
     }
 }
 
-function delay(time: number): Promise<void> {
+function delay(time: number): Promise<void> 
+{
     return new Promise(resolve => {
         setTimeout(resolve, time);
     });

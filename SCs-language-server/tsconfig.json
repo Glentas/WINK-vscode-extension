@@ -1,7 +1,14 @@
 {
 	"compilerOptions": {
-		"target": "es6",
-		"lib": ["es6"],
+		"module": "CommonJS",
+		"target": "ES2021",
+		"lib": [
+			"ES2021",
+			"DOM"
+		],
+		"types": [
+			"node"
+		],
 		"moduleResolution": "node",
 		"sourceMap": true,
 		"strict": true,
@@ -12,7 +19,10 @@
 		"declaration": true,
 		"declarationMap": true,
 	},
-	"include": ["src"],
-	"exclude": ["node_modules"]
-	
+	"include": [
+		"src"
+	],
+	"exclude": [
+		"node_modules"
+	]
 }

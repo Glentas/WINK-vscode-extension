@@ -1,9 +1,10 @@
 'use strict';
 
+import { WebSocket } from 'ws';
 import * as vs from 'vscode-languageserver';
 import { SCsSession } from './scsSession.js';
 import { getFilesInDirectory, getFileContent, normalizeFilePath } from './scsUtils.js';
-import {ScClient} from 'ts-sc-client-ws';
+import {ScClient} from 'ts-sc-client';
 
 interface scsServerParams {
     onlineMode: boolean
@@ -20,6 +21,7 @@ let workspaceRoot: string | null | undefined;
 let scMachineUrl: string | undefined;
 let onlineMode: boolean = false;
 let client: ScClientWrapper;
+
 export class ScClientWrapper {
     connection: ScClient | null = null;
     url: string = '';
@@ -31,7 +33,8 @@ export class ScClientWrapper {
     reconfigure(scMachineUrl: string, isOnline: boolean) {
         this.url = scMachineUrl;
         this.online = isOnline;
-        this.connection = (this.url && this.online) ? new ScClient(scMachineUrl) : null;
+        this.connection = (this.url && this.online) ? new ScClient(new WebSocket(scMachineUrl) as unknown as globalThis.WebSocket) : null;
+
     }
 
     get isOnline(): boolean {

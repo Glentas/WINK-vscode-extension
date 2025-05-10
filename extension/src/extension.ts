@@ -18,7 +18,7 @@ import {convertOldGwfToNew, isOldGwf} from "./Old2NewScgConverter";
 
 ``
 let client: LanguageClient;
-let scMachineUrl = "ws://localhost:8090";
+let scMachineUrl = "ws:\\\\localhost:8090";
 let scsLoader: ScsLoader;
 let scsSearcher: SearcherByTemplate;
 let connectionManager: ConnectionManager;
@@ -46,9 +46,11 @@ const onCommandUpload = async (loadMode: LoadMode) => {
     }
     const editor = vscode.window.activeTextEditor;
 
-    if (editor) {
+    if (editor) 
+    {
         const loadedScs = (await scsLoader.loadScs([editor.document.uri], loadMode))[0];
-        if (loadedScs && loadedScs.length > 0) {
+        if (loadedScs && loadedScs.length > 0) 
+        {
             // Create and show a new webview
             const panel = vscode.window.createWebviewPanel(
                 'scsLoad', // Identifies the type of the webview. Used internally
@@ -60,7 +62,8 @@ const onCommandUpload = async (loadMode: LoadMode) => {
                     enableCommandUris: true,
                 }
             );
-            if (loadMode == LoadMode.Preview) {
+            if (loadMode == LoadMode.Preview) 
+            {
                 panel.onDidDispose(() => {
                     scsLoader.unloadScs([editor.document.uri]);
                 })
@@ -68,7 +71,9 @@ const onCommandUpload = async (loadMode: LoadMode) => {
             vscode.window.showInformationMessage(loadedScs);
             panel.webview.html = `<iframe src="http://localhost:8000?sys_id=${loadedScs}&scg_structure_view_only=true" height="1000" width="100%" title="SCs"></iframe>`;
             panel.title = loadedScs;
-        } else {
+        } 
+        else 
+        {
             vscode.window.showErrorMessage(`Error`);
         }
     }
@@ -92,9 +97,12 @@ const onCommandUploadAll = async (loadMode: LoadMode) => {
     );
 
     const allScsFiles = await vscode.workspace.findFiles("**/*.scs");
-    if (allScsFiles) {
+    if (allScsFiles) 
+    {
         const loadedScs = (await scsLoader.loadScs(allScsFiles, loadMode));
-        if (loadedScs.length > 0) {
+
+        if (loadedScs.length > 0) 
+        {
             // ToDo fix link
             panel.webview.html = `<iframe src="http://localhost:8000?sys_id=unknowntechnicalid&scg_structure_view_only=true" height="1000" width="100%" title="SCs"></iframe>`;
         }
@@ -106,14 +114,22 @@ const onCommandUnload = async (scsFile: LoadedScs) => {
         vscode.window.showErrorMessage("Unable to perform operation. Connect to sc-machine.");
         return;
     }
+
     const editor = vscode.window.activeTextEditor;
     let unloadedScs: { idtf: string, errorMsg: string };
-    if (scsFile != undefined) {
+
+    if (scsFile != undefined) 
+    {
         unloadedScs = (await scsLoader.unloadScs([scsFile.filename]))[0];
-    } else if (editor) {
+    } 
+
+    else if (editor) 
+    {
         unloadedScs = (await scsLoader.unloadScs([editor.document.uri]))[0];
     }
-    if (unloadedScs.idtf) {
+
+    if (unloadedScs.idtf) 
+    {
         vscode.window.showInformationMessage(`Successfully deleted ${unloadedScs.idtf}`);
         vscode.window.tabGroups.all
             .flatMap(({tabs}) => tabs)
@@ -121,29 +137,38 @@ const onCommandUnload = async (scsFile: LoadedScs) => {
             .forEach(label => {
                 vscode.window.tabGroups.close(label);
             });
-    } else {
+    }
+    else 
+    {
         vscode.window.showErrorMessage(unloadedScs.errorMsg);
     }
 };
 
 const onCommandUnloadAll = async () => {
-    if (connectionManager.client == undefined) {
+    if (connectionManager.client == undefined) 
+    {
         vscode.window.showErrorMessage("Unable to perform operation. Connect to sc-machine.");
         return;
     }
     const allProjectDocuments = vscode.workspace.textDocuments.map(document => document.uri);
-    if (allProjectDocuments) {
+    if (allProjectDocuments) 
+    {
         const unloadedScs = (await scsLoader.unloadAll());
-        if (unloadedScs) {
+
+        if (unloadedScs) 
+        {
             vscode.window.showInformationMessage("All successfully unloaded");
-        } else {
-            vscode.window.showErrorMessage("Nothing to unload");
+        } 
+        else 
+        {
+            //vscode.window.showErrorMessage("Nothing to unload");
         }
     }
 };
 
 const onCommandScsFindByTemplate = async () => {
-    if (connectionManager.client == undefined) {
+    if (connectionManager.client == undefined) 
+    {
         vscode.window.showErrorMessage("Unable to perform operation. Connect to sc-machine.");
         return;
     }
@@ -158,9 +183,11 @@ const onCommandScsFindByTemplate = async () => {
             enableCommandUris: true,
         }
     );
+
     const editor = vscode.window.activeTextEditor;
 
-    if (editor) {
+    if (editor) 
+    {
         const itdfOfSearchingResults = await scsSearcher.findByScsTemplate(editor.document.getText());
         vscode.window.showInformationMessage(itdfOfSearchingResults);
         panel.webview.html = `<iframe src="http://localhost:8000?sys_id=${itdfOfSearchingResults}&scg_structure_view_only=true" height="1000" width="100%" title="SCs"></iframe>`;
@@ -173,12 +200,17 @@ const onCommandScsGenScs = async () => {
         title: "Gen SCs by entity name",
         prompt: "For example, 'Human; Carl Linnaeus; Q2'"
     });
+
     if (!entityName) return;
+
     const entities = entityName.split(';');
     const inputMap = new Map<string, string>();
-    for (let i = 0; i < entities.length; i++) {
+
+    for (let i = 0; i < entities.length; i++) 
+    {
         inputMap.set(entities[i].trim(), `en`)
     }
+
     const generationResults = await genScs(inputMap)
     const wsPath = vscode.workspace.workspaceFolders[0].uri.fsPath; // gets the path of the first workspace folder
     const wsEdit = new vscode.WorkspaceEdit();
@@ -188,7 +220,9 @@ const onCommandScsGenScs = async () => {
 
 const onCommandGwfToScs = async () => {
     const editor = vscode.window.activeTextEditor;
-    if (editor) {
+
+    if (editor) 
+    {
         const gwfXml = (await vscode.workspace.openTextDocument(editor.document.uri)).getText();
         const newXml = convertOldGwfToNew(gwfXml);
         gwfToScs(newXml,
@@ -211,18 +245,23 @@ const onCommandGwfToScs = async () => {
 const convertOldGwfFilesToNewFormat = async () => {
     const gwfFilesUris = await vscode.workspace.findFiles('**/*.gwf');
     const oldGwfs: Uri[] = [];
-    for (let i = 0; i < gwfFilesUris.length; i++) {
+    for (let i = 0; i < gwfFilesUris.length; i++) 
+    {
         const gwfXml = (await vscode.workspace.openTextDocument(gwfFilesUris[i])).getText();
-        if (isOldGwf(gwfXml)) {
+        if (isOldGwf(gwfXml)) 
+        {
             oldGwfs.push(gwfFilesUris[i]);
         }
     }
 
-    if (oldGwfs.length > 0) {
+    if (oldGwfs.length > 0) 
+    {
         vscode.window.showInformationMessage(`You have ${oldGwfs.length} .gwf files in the old format. Would you like to convert them to the new format? Note: the new format cannot be opened in KBE version 3.1 and below. `, 'Yes', 'No')
             .then(async (selection) => {
-                if (selection === 'Yes') {
-                    for (let i = 0; i < oldGwfs.length; i++) {
+                if (selection === 'Yes') 
+                {
+                    for (let i = 0; i < oldGwfs.length; i++) 
+                    {
                         const gwfXml = (await vscode.workspace.openTextDocument(gwfFilesUris[i])).getText();
                         const newGwfXml = convertOldGwfToNew(gwfXml);
                         const writeData = Buffer.from(newGwfXml, 'utf8');
@@ -238,7 +277,8 @@ const userTips = async () => {
     await convertOldGwfFilesToNewFormat();
 };
 
-export async function activate(context: ExtensionContext) {
+export async function activate(context: ExtensionContext) 
+{
     // The server is implemented in node
     const serverModule = context.asAbsolutePath(
         path.join('SCs-language-server', 'out', 'scsServer.js')
@@ -336,13 +376,16 @@ export async function activate(context: ExtensionContext) {
     await userTips();
 }
 
-export function deactivate(): Thenable<void> {
+export function deactivate(): Thenable<void> 
+{
     return scsLoader.unloadAll(LoadMode.Preview).then(() => {
-        if (!client) {
+        if (!client) 
+        {
             return undefined;
         }
         return client.stop();
-    }).catch(() => {
+        
+    }).catch((): any => {
         return undefined;
     });
 }

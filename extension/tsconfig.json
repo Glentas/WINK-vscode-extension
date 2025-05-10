@@ -2,7 +2,13 @@
 	"compilerOptions": {
 		"module": "CommonJS",
 		"target": "ES2021",
-		"lib": ["ES2021", "dom"],
+		"lib": [
+			"ES2021",
+			"DOM"
+		],
+		"types": [
+			"node"
+		],
 		"noImplicitAny": true,
 		"noImplicitReturns": true,
 		"noUnusedLocals": true,
@@ -12,13 +18,15 @@
 		"sourceMap": true,
 		"esModuleInterop": true,
 		"allowJs": true,
-		"moduleResolution":"node",
+		"moduleResolution": "node",
 		"skipLibCheck": true
 	},
-	"include": ["src"],
+	"include": [
+		"src"
+	],
 	"exclude": [
 		"node_modules",
 		"./node_modules/*",
 		"**/*.spec.*"
-	  ]
+	]
 }
