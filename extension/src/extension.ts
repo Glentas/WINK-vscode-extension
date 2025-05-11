@@ -167,7 +167,8 @@ const onCommandUnloadAll = async () => {
 };
 
 const onCommandScsFindByTemplate = async () => {
-    vscode.window.showInformationMessage("Example of template: 'set _-> _b;;'");
+    vscode.window.showInformationMessage("Template structure looks like this (c - constant, v - variable):\n c-v-v, c-v-c, v-v-c");
+    
     if (connectionManager.client == undefined) 
     {
         vscode.window.showErrorMessage("Unable to perform operation. Connect to sc-machine.");
