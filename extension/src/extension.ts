@@ -22,6 +22,7 @@ let scMachineUrl = "ws://localhost:8090/";
 let scsLoader: ScsLoader;
 let scsSearcher: SearcherByTemplate;
 let connectionManager: ConnectionManager;
+let opened_panels: Map<string, vscode.WebviewPanel> = new Map();
 
 const onCommandScsConnect = async () => {
     scMachineUrl = await vscode.window.showInputBox({
@@ -71,6 +72,8 @@ const onCommandUpload = async (loadMode: LoadMode) => {
             vscode.window.showInformationMessage(loadedScs);
             panel.webview.html = `<iframe src="http://localhost:8000?sys_id=${loadedScs}&scg_structure_view_only=true" height="1000" width="100%" title="SCs"></iframe>`;
             panel.title = loadedScs;
+
+            opened_panels.set(loadedScs, panel);
         } 
         else 
         {
@@ -80,31 +83,36 @@ const onCommandUpload = async (loadMode: LoadMode) => {
 };
 
 const onCommandUploadAll = async (loadMode: LoadMode) => {
+
     if (connectionManager.client == undefined) {
         vscode.window.showErrorMessage("Unable to perform operation. Connect to sc-machine.");
         return;
     }
-    // Create and show a new webview
-    const panel = vscode.window.createWebviewPanel(
-        'scsLoad', // Identifies the type of the webview. Used internally
-        'SCs', // Title of the panel displayed to the user
-        vscode.ViewColumn.Beside,
-        {   // params to unlock sc-web scripts
-            enableScripts: true,
-            enableFindWidget: true,
-            enableCommandUris: true,
-        }
-    );
 
     const allScsFiles = await vscode.workspace.findFiles("**/*.scs");
+
     if (allScsFiles) 
     {
         const loadedScs = (await scsLoader.loadScs(allScsFiles, loadMode));
-
+        
         if (loadedScs.length > 0) 
         {
-            // ToDo fix link
-            panel.webview.html = `<iframe src="http://localhost:8000?sys_id=unknowntechnicalid&scg_structure_view_only=true" height="1000" width="100%" title="SCs"></iframe>`;
+            for(const scs of loadedScs)
+            {
+                const panel = vscode.window.createWebviewPanel('scsLoad', 'SCs', vscode.ViewColumn.Beside,
+                {
+                    enableScripts: true,
+                    enableFindWidget: true,
+                    enableCommandUris: true,
+                });
+         
+                panel.webview.html = `<iframe src="http://localhost:8000?sys_id=${scs}&scg_structure_view_only=true" height="1000" width="100%" title="SCs"></iframe>`;
+                panel.title = scs;
+
+                opened_panels.set(scs, panel);
+
+            }
+
         }
     }
 };
@@ -118,15 +126,23 @@ const onCommandUnload = async (scsFile: LoadedScs) => {
     const editor = vscode.window.activeTextEditor;
     let unloadedScs: { idtf: string, errorMsg: string };
 
+    let panel = undefined;
+
     if (scsFile != undefined) 
     {
+        panel = opened_panels.get(scsFile.id);
+        
         unloadedScs = (await scsLoader.unloadScs([scsFile.filename]))[0];
     } 
-
     else if (editor) 
     {
+        panel = opened_panels.get(scsLoader.loadedScs.get(editor.document.uri).id);
+
         unloadedScs = (await scsLoader.unloadScs([editor.document.uri]))[0];
     }
+
+    await panel.webview.postMessage({ command: 'close-iframe' });
+    await panel.dispose();
 
     if (unloadedScs.idtf) 
     {
@@ -151,9 +167,16 @@ const onCommandUnloadAll = async () => {
         return;
     }
     const allProjectDocuments = vscode.workspace.textDocuments.map(document => document.uri);
+
     if (allProjectDocuments) 
     {
         const unloadedScs = (await scsLoader.unloadAll());
+
+        for(const panel of opened_panels.values())
+        {
+            await panel.webview.postMessage({ command: 'close-iframe' });
+            await panel.dispose();
+        }
 
         if (unloadedScs) 
         {
