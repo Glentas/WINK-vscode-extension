@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import {ScAddr, ScClient, ScTemplate, ScType} from 'ts-sc-client';
+import {ScAddr, ScClient, ScTemplate, ScTemplateResult, ScType} from 'ts-sc-client';
 import {createTechnicalWinkId} from "./Utils";
 import {convertOldGwfToNew} from "./Old2NewScgConverter";
 import {gwfToScsAsync} from "kb-generator-ts";
@@ -12,7 +12,6 @@ export enum LoadMode
     Save
 }
 
-// loading happens to the file we are writing in (requires click)
 export class ScsLoader implements vscode.TreeDataProvider<LoadedScs> 
 {
     loadedScs: Map<vscode.Uri, LoadedScs> = new Map();
@@ -23,7 +22,7 @@ export class ScsLoader implements vscode.TreeDataProvider<LoadedScs>
         this.scClient = client;
     }
 
-    async loadScs(filenames: vscode.Uri[], loadMode: LoadMode = LoadMode.Preview): Promise<string[]> 
+    async loadScs(filenames: vscode.Uri[], loadMode_: LoadMode = LoadMode.Preview): Promise<string[]> 
     {
         const result: string[] = [];
 
@@ -37,11 +36,7 @@ export class ScsLoader implements vscode.TreeDataProvider<LoadedScs>
             if (filename.path.endsWith('.gwf')) 
             {
                 const gwfInNewFormat: string = convertOldGwfToNew(doc.getText());
-
-                // this function should be replaced by another outer module from sc-machine
                 const resultScs = await gwfToScsAsync(gwfInNewFormat);
-
-                //creating NodeStructure in scs
                 preparedScs = this.wrapScs(resultScs);
             } 
             else 
@@ -52,14 +47,12 @@ export class ScsLoader implements vscode.TreeDataProvider<LoadedScs>
             if (!preparedScs) continue;
             
             console.log("loadScs, preparedScs:", preparedScs);
-            //preparedScs.text contains structure (ex: wink_BCH8_d = [*a -> b;;*]) 
             const isCreated = await this.scClient.generateElementsBySCs([preparedScs.text]);
 
             if (isCreated) 
             {
                 vscode.window.showInformationMessage("Loading completed successfully");
-                // loadedScs has all currently loaded files into sc-machine
-                this.loadedScs.set(filename, new LoadedScs(filename, {id: preparedScs.id, mode: loadMode, text: preparedScs.text}));
+                this.loadedScs.set(filename, new LoadedScs(filename, {id: preparedScs.id, mode: loadMode_, text: preparedScs.text}));
                 result.push(preparedScs.id);
                 console.log("loadScs, loadedSCS:", this.loadedScs);
             } 
@@ -71,7 +64,6 @@ export class ScsLoader implements vscode.TreeDataProvider<LoadedScs>
         }
         this.refresh();
         
-
         return result;
     }
 
@@ -94,7 +86,6 @@ export class ScsLoader implements vscode.TreeDataProvider<LoadedScs>
                 this.loadedScs.delete(filename);
                 this.refresh();
 
-                // this return existing? node with WinkIdtf which is NodeStructure 
                 const contourAddr = (await this.scClient.resolveKeynodes([{
                     id: contourNodeIdtf,
                     type: ScType.Node
@@ -102,17 +93,19 @@ export class ScsLoader implements vscode.TreeDataProvider<LoadedScs>
 
                 console.log("unloadScs, contourAddr:", contourAddr.value);
 
-                // Searching elements that are included in this structure
                 const foundAddrs = await this.findElementsInContour(contourAddr);
                 const array_with_sc_addrs_to_delete: ScAddr[] = [];
 
                 for(const addr of foundAddrs)
                 {
-                    array_with_sc_addrs_to_delete.push(new ScAddr(addr));
+                    const temp_addr = new ScAddr(addr)
+                    array_with_sc_addrs_to_delete.push(temp_addr);
                 }
 
                 console.log("unloadScs, Enter function eraseElements. Deleting addrs:", array_with_sc_addrs_to_delete);
+
                 await this.scClient.eraseElements(array_with_sc_addrs_to_delete);
+
                 console.log("unloadScs, Erased succesfully");
 
                 if (foundAddrs.size > 0) 
@@ -138,14 +131,14 @@ export class ScsLoader implements vscode.TreeDataProvider<LoadedScs>
         return result;
     }
 
-    public async unloadAll(loadMode: LoadMode = LoadMode.Preview): Promise<Set<number>> 
+    public async unloadAll(loadMode_: LoadMode = LoadMode.Preview): Promise<Set<number>> 
     {
         const allIdtfs = this.loadedScs.values();
         const foundAddrs = new Set<number>();
 
         for (const scsIdtf of allIdtfs) 
         {
-            if (scsIdtf.mode == loadMode) 
+            if (scsIdtf.mode == loadMode_) 
             {
                 const contourAddr = (await this.scClient.resolveKeynodes([{
                     id: scsIdtf.id,
@@ -154,7 +147,7 @@ export class ScsLoader implements vscode.TreeDataProvider<LoadedScs>
 
                 const temp = await this.findElementsInContour(contourAddr);
                 
-                console.log("Unload all: contourAddr:", contourAddr.value);
+                console.log("unloadAll, contourAddr:", contourAddr.value);
 
                 temp.forEach(element => {
                     foundAddrs.add(element);
@@ -163,7 +156,16 @@ export class ScsLoader implements vscode.TreeDataProvider<LoadedScs>
         }
 
         console.log("unloadAll, Enter function eraseElements. Deleting addrs:", foundAddrs);
-        await this.scClient.eraseElements(Array.from(foundAddrs).map(e => new ScAddr(e)));
+
+        const scaddrs_to_erase: ScAddr[] = []
+        for(const addr of foundAddrs)
+        {
+            const temp_addr = new ScAddr(addr);
+            scaddrs_to_erase.push(temp_addr);
+        }
+
+        await this.scClient.eraseElements(scaddrs_to_erase);
+
         console.log("unloadAll, Erased succesfully");
 
         this.loadedScs.clear();
@@ -173,7 +175,6 @@ export class ScsLoader implements vscode.TreeDataProvider<LoadedScs>
 
     private async findElementsInContour(contourNode: ScAddr) 
     {
-        // this is general templates with structures that are most common in scs
         const unloadingTemplate1 = new ScTemplate().triple(
             contourNode,
             ScType.VarPermPosArc,
@@ -197,24 +198,25 @@ export class ScsLoader implements vscode.TreeDataProvider<LoadedScs>
         
         const templates = [unloadingTemplate1, unloadingTemplate2, unloadingTemplate3, unloadingTemplate4];
 
-        const foundAddrs = new Set<number>();
-        const found = [];
+        let searchingResults: ScTemplateResult[] = [];
 
         for (const template of templates) 
         {
-            found.push(await this.scClient.searchByTemplate(template));
+            searchingResults.push(...await this.scClient.searchByTemplate(template));
         }
 
-        found.reduce((prev, current) => prev.concat(current)).forEach(triplet => triplet.forEachTriple((addr1, addr2, addr3) => {
-                foundAddrs.add(addr1.value);
-                foundAddrs.add(addr2.value);
-                foundAddrs.add(addr3.value);
-                console.log("Found elements in contour: ", addr1.value, addr2.value, addr3.value);
-            }));
+        const uniqNodes = new Set<number>();
+        for(const i of searchingResults.values())
+        {
+            for(let j = 0; j < i.size; j++)
+            {
+                uniqNodes.add(i.get(j).value);
+            }
+        }
 
-        console.log(foundAddrs);
+        console.log("findElementsInContour", uniqNodes);
 
-        return foundAddrs;
+        return uniqNodes;
     }
 
     private _onDidChangeTreeData: vscode.EventEmitter<LoadedScs | undefined | void> = new vscode.EventEmitter<LoadedScs | undefined | void>();

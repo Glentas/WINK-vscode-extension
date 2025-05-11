@@ -65,12 +65,14 @@ export class SearcherByTemplate {
         {
             console.log("findByScsTemplate, found no structures");
         }
+        else
+        {
+            console.log("findByScsTemplate, generating construction...", construction);
 
-        console.log("findByScsTemplate, generating construction...", construction);
+            await this.scClient.generateElements(construction);
 
-        await this.scClient.generateElements(construction);
-
-        console.log("findByScsTemplate, generation is succesfull");
+            console.log("findByScsTemplate, generation is succesfull");
+        }
 
         return structWinkIdtf;
     }

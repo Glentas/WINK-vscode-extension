@@ -34,6 +34,7 @@ export class ScClientWrapper {
         this.url = scMachineUrl;
         this.online = isOnline;
         this.connection = (this.url && this.online) ? new ScClient(new WebSocket(scMachineUrl) as unknown as globalThis.WebSocket) : null;
+        connection.console.log("reconfigure LSP, this.connection:" + scMachineUrl);
 
     }
 

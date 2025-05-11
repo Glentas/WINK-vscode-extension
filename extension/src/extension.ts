@@ -167,8 +167,10 @@ const onCommandUnloadAll = async () => {
 };
 
 const onCommandScsFindByTemplate = async () => {
-    vscode.window.showInformationMessage("Template structure looks like this (c - constant, v - variable):\n c-v-v, c-v-c, v-v-c");
-    
+    vscode.window.showInformationMessage("Template structures look like this (c - constant, v - variable):");
+    vscode.window.showInformationMessage("triples: c-v-v, c-v-c, v-v-c");
+    vscode.window.showInformationMessage("quintiples: triples: c-v-v-v-v, c-v-c-v-v, c-v-c-v-c, v-v-c-v-v, v-v-c-v-c, v-v-v-v-c");
+
     if (connectionManager.client == undefined) 
     {
         vscode.window.showErrorMessage("Unable to perform operation. Connect to sc-machine.");
