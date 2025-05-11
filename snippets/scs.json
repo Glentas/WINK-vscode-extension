@@ -5,128 +5,156 @@
         "body": [
             "=> nrel_main_idtf:",
             "\t[$1]",
-            "\t(* <- lang_$2;; *);$0"
+            "\t(* <- lang_$2;; *);;$0"
         ]
     },
 
-    "Const Norole Relation (Arc)": {
-        "prefix": "nrel_arc",
+    "Const Non role Relation (Arc)": {
+        "prefix": "=>",
         "body": [
             "=> ${1:relation}:",
-            "\t${2:subject};$0"
+            "\t${2:subject};;$0"
         ],
-        "description": "Binary norole relation (arc)"
+        "description": "Binary non role relation (arc)"
     },
 
-    "Var Norole Relation (Arc)": {
-        "prefix": "_nrel_arc",
+    "Var Non Role Relation (Arc)": {
+        "prefix": "_=>",
         "body": [
             "_=> ${1:relation}:",
-            "\t${2:subject};$0"
+            "\t${2:subject};;$0"
         ],
-        "description": "Binary variable norole relation (arc)"
+        "description": "Binary variable non role relation (arc)"
     },
 
-    "Const Norole Relation-back": {
-        "prefix": "nrel_arc-b",
+    "Const Non Role Relation-back": {
+        "prefix": "<=",
         "body": [
             "<= ${1:relation}:",
-            "\t${2:subject};$0"
+            "\t${2:subject};;$0"
         ],
-        "description": "Binary norole relation reversed"
+        "description": "Binary non role relation reversed"
     },
 
-    "Var Norole Relation-back": {
-        "prefix": "_nrel_arc-b",
+    "Var Non Role Relation-back": {
+        "prefix": "<=_",
         "body": [
-            "_<= ${1:relation}:",
-            "\t${2:subject};$0"
+            "<=_ ${1:relation}:",
+            "\t${2:subject};;$0"
         ],
-        "description": "Binary variable norole relation reversed"
+        "description": "Binary variable non role relation reversed"
     },
 
-    "Const Norole Relation (Edge)": {
-        "prefix": "nrel_edge",
-        "body": [
-            "<=> ${1:relation}:",
-            "\t${2:subject};$0"
-        ],
-        "description": "Binary norole relation (edge)"
-    },
-
-    "Var Norole Relation (Edge)": {
-        "prefix": "_nrel_edge",
+    "Const Non Role Relation (Edge)": {
+        "prefix": "<=>",
         "body": [
             "<=> ${1:relation}:",
-            "\t${2:subject};$0"
+            "\t${2:subject};;$0"
         ],
-        "description": "Binary variable norole relation (edge)"
+        "description": "Binary non role relation (edge)"
+    },
+
+    "Var Non Role Relation (Edge)": {
+        "prefix": "_<=>",
+        "body": [
+            "_<=> ${1:relation}:",
+            "\t${2:subject};;$0"
+        ],
+        "description": "Binary variable non role relation (edge)"
     },
 
     "Role Relation": {
-        "prefix": "rrel",
+        "prefix": "->",
         "body": [
             "-> ${1:relation}:",
-            "\t${2:subject};$0"
+            "\t${2:subject};;$0"
         ],
         "description": "Binary role relation"
     },
 
     "Var Role Relation": {
-        "prefix": "_rrel",
+        "prefix": "_->",
         "body": [
             "_-> ${1:relation}:",
-            "\t${2:subject};$0"
+            "\t${2:subject};;$0"
         ],
         "description": "Binary variable role relation"
     },
 
     "Role Relation-back": {
-        "prefix": "rrel-b",
+        "prefix": "<-",
         "body": [
             "<- ${1:relation}:",
-            "\t${2:subject};$0"
+            "\t${2:subject};;$0"
         ],
         "description": "Binary role relation reversed"
     },
 
     "Var Role Relation-back": {
-        "prefix": "_rrel-b",
+        "prefix": "<-_",
         "body": [
-            "<- ${1:relation}:",
-            "\t${2:subject};$0"
+            "<-_ ${1:relation}:",
+            "\t${2:subject};;$0"
         ],
         "description": "Binary variable role relation reversed"
     },
 
-    "Set": {
-        "prefix": "set",
+    "Non Oriented Set": {
+        "prefix": ["non_oriented_set"],
         "body": [
             "{",
-            "\t${1:element};",
-            "\t${2:element}",
-            "};$0"
-        ]
+            "\t${1:element1};",
+            "\t${2:attr2}: ${3:element2}",
+            "};;$0"
+        ],
+        "description": "Non Oriented Set"
     },
 
-    "Tuple": {
-        "prefix": "tuple",
+    "Oriented Set": {
+        "prefix": ["oriented_set"],
         "body": [
-            "...",
-            "\t(*",
-            "\t\t${1:<- node_1};;",
-            "\t\t${2:-> node_2};;",
-            "\t*);$0"
-        ]
+            "<",
+            "\t${1:element1};",
+            "\t${2:attr2}: ${3:element2}",
+            ">;;$0"
+        ],
+        "description": "Oriented Set"
+    },
+
+    "Subitem": {
+        "prefix": ["subitem"],
+        "body": [
+            "(*",
+            "\t${1:-> element1};;",
+            "\t${2:-> element2};;",
+            "*);;$0"
+        ],
+        "description": "Subitem"
     },
 
     "Structure": {
-        "prefix": "struct",
+        "prefix": ["structure"],
         "body": [
-            "= [*",
-            "\t{1:subject_1} => ${1:relation}:",
-            "\t\t${2:subject};;$0",
-            "*];$0"
-        ]
+            "[*",
+            "\t${1:element1} -> ${2:element2};;",
+            "*];;$0"
+        ],
+        "description": "Structure"
+    },
+
+    "Number": {
+        "prefix": ["number"],
+        "body": [
+            "[^\"${1:float}: $(2:52.42)\"];;$0"
+        ],
+        "description": "Number representation (sc link content)"
+    },
+
+    "String": {
+        "prefix": ["string (strok)"],
+        "body": [
+            "[${1:my_string}];;$0"
+        ],
+        "description": "String representation (sc link content)"
     }
 }
