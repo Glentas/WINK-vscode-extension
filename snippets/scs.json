@@ -10,7 +10,7 @@
     },
 
     "Const Non role Relation (Arc)": {
-        "prefix": "=>",
+        "prefix": "nrel_const",
         "body": [
             "=> ${1:relation}:",
             "\t${2:subject};;$0"
@@ -19,7 +19,7 @@
     },
 
     "Var Non Role Relation (Arc)": {
-        "prefix": "_=>",
+        "prefix": "nrel_var",
         "body": [
             "_=> ${1:relation}:",
             "\t${2:subject};;$0"
@@ -28,7 +28,7 @@
     },
 
     "Const Non Role Relation-back": {
-        "prefix": "<=",
+        "prefix": "nrel_const_backwards",
         "body": [
             "<= ${1:relation}:",
             "\t${2:subject};;$0"
@@ -37,7 +37,7 @@
     },
 
     "Var Non Role Relation-back": {
-        "prefix": "<=_",
+        "prefix": "nrel_var_backwards",
         "body": [
             "<=_ ${1:relation}:",
             "\t${2:subject};;$0"
@@ -46,7 +46,7 @@
     },
 
     "Const Non Role Relation (Edge)": {
-        "prefix": "<=>",
+        "prefix": "nrel_const_binary",
         "body": [
             "<=> ${1:relation}:",
             "\t${2:subject};;$0"
@@ -55,7 +55,7 @@
     },
 
     "Var Non Role Relation (Edge)": {
-        "prefix": "_<=>",
+        "prefix": "nrel_var_binary",
         "body": [
             "_<=> ${1:relation}:",
             "\t${2:subject};;$0"
@@ -64,7 +64,7 @@
     },
 
     "Role Relation": {
-        "prefix": "->",
+        "prefix": "rrel_const",
         "body": [
             "-> ${1:relation}:",
             "\t${2:subject};;$0"
@@ -73,7 +73,7 @@
     },
 
     "Var Role Relation": {
-        "prefix": "_->",
+        "prefix": "rrel_var",
         "body": [
             "_-> ${1:relation}:",
             "\t${2:subject};;$0"
@@ -82,7 +82,7 @@
     },
 
     "Role Relation-back": {
-        "prefix": "<-",
+        "prefix": "rrel_const_backwards",
         "body": [
             "<- ${1:relation}:",
             "\t${2:subject};;$0"
@@ -91,7 +91,7 @@
     },
 
     "Var Role Relation-back": {
-        "prefix": "<-_",
+        "prefix": "rrel_var_backwards",
         "body": [
             "<-_ ${1:relation}:",
             "\t${2:subject};;$0"
